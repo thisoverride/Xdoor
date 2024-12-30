@@ -1,28 +1,37 @@
 const io = require('socket.io-client');
+const { exec } = require('child_process');
 
-// Connexion au serveur
 const socket = io('http://localhost:3000');
 
 
 socket.on('connect', () => {
-    console.log('Connected to server');
+    console.log('Connected to server');    
 });
 
-// Écoute des réponses du serveur
-socket.on('response', (data) => {
-    console.log('Server response:', data);
+
+socket.on('execute', (data) => {
+    const { senderId, type, command } = data;
+    console.log(`Received command from ${senderId} type: ${type} : ${command}`);
+
+    exec(command, (error, stdout, stderr) => {
+        let result;
+
+        if (error) {
+            result = `${error.message}`;
+        } else if (stderr) {
+            result = `${stderr}`;
+        } else {
+            result = `${stdout}`;
+        }
+
+        console.log(`Sending response to ${senderId}: ${result}`);
+
+        socket.emit('result', { senderId, result });
+    });
 });
 
-function sendCommand(command) {
-    console.log('Sending command:', command);
-    socket.emit('command', command);
-}
+
 
 socket.on('error', (error) => {
     console.error('Socket error:', error);
 });
-
-setTimeout(() => {
-    sendCommand('help');
-    sendCommand('echo Hello from Node.js!');
-}, 1000);

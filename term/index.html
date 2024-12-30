@@ -30,6 +30,7 @@
         }
         #command-line {
             display: flex;
+            flex-wrap: wrap;
             padding: 10px;
             background-color: #1e1e1e;
             border-top: 1px solid #333;
@@ -41,8 +42,9 @@
             color: #00ff00;
             outline: none;
             font-size: 16px;
+            margin: 5px 0;
         }
-        #input::placeholder {
+        #executor-id::placeholder, #input::placeholder {
             color: #888;
         }
         button {
@@ -66,41 +68,6 @@
         <button id="send">Send</button>
     </div>
     <script src="socket/socket.io.js"></script>
-    <script>
-        const socket = io('http://localhost:3000');
-        const input = document.getElementById('input');
-        const sendButton = document.getElementById('send');
-        const terminalOutput = document.getElementById('terminal-output');
-
-        function addOutput(text) {
-            const li = document.createElement('li');
-            li.textContent = text;
-            terminalOutput.appendChild(li);
-            terminalOutput.scrollTop = terminalOutput.scrollHeight;
-        }
-
-        function handleCommand(command) {
-            addOutput(`> ${command}`);
-            socket.emit('command', command);
-        }
-
-        socket.on('response', (response) => {
-            addOutput(response);
-        });
-
-        sendButton.addEventListener('click', () => {
-            const command = input.value.trim();
-            if (command) {
-                handleCommand(command);
-                input.value = '';
-            }
-        });
-
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                sendButton.click();
-            }
-        });
-    </script>
+    <script src="index.js"></script>
 </body>
 </html>
