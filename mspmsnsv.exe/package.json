@@ -1,0 +1,9 @@
+{
+  "name": "mspmsnsv.exe",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "socket.io-client": "^4.8.1"
+  }
+}
