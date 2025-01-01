@@ -25,7 +25,7 @@ function createListenerDecorator(event: string): MethodDecorator {
 }
 
 export const OnDisconnect = () => createListenerDecorator('disconnect');
-export const OnConnect = () => createListenerDecorator('connection');
+export const OnConnect = () => createListenerDecorator('connect');
 export const Channel = (event: string) => createListenerDecorator(event);
 export const POST = createMethodDecorator('post');
 export const GET = createMethodDecorator('get');
