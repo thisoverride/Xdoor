@@ -27,7 +27,7 @@ export default class BridgeController {
   public async handleRegisterClient(socket: Socket, data: any): Promise<void> {
     if(ClientManagerService.TYPE_CLIENT.EXEC === data.type){
       await this._clientManagerService.setClient(socket.id, socket, data);
-      console.log('executor added')
+      console.log('executor added',socket.id)
     } else if(ClientManagerService.TYPE_CLIENT.SENDER === data.type){
       console.log('client added' , socket.id)
     }
@@ -43,9 +43,13 @@ export default class BridgeController {
   public async handleExecCommand(socket: Socket, data: { to: string; message: string }): Promise<void> {
     const targetClient = await this._clientManagerService.getClient(data.to);
     if (targetClient) {
-      targetClient.socket.emit('command', data.message);  
+      targetClient.socket.emit('exec:term');  
     } else {
       socket.emit('error', { message: 'Client non trouvé' });
     }
+  }
+  @Channel('open:term')
+  public async handleTest(socket: Socket, id: string): Promise<void> {
+    socket.to(id).emit('exec:term')
   }
 }

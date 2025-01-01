@@ -1,4 +1,5 @@
 import { injectable } from "inversify";
+import { json } from "sequelize";
 
 interface Client {
   id: string;
@@ -33,7 +34,7 @@ export default class ClientManagerService {
     const result = []
     for (const [_key, client] of this.clients.entries()) {
       if(client.hostInfo){
-        result.push(client.hostInfo.hostname)
+        result.push(JSON.stringify(client.hostInfo))
       }
     }
     return result;

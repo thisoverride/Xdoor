@@ -2,9 +2,12 @@
   "name": "backdoor",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "license": "MIT",
   "dependencies": {
     "express": "^4.21.2",
+    "public-ip": "^7.0.1",
     "socket.io": "^4.8.1"
+    
   }
 }
