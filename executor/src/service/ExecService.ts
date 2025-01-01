@@ -1,18 +1,40 @@
 import { injectable } from "inversify";
 import os from 'os';
 import { type IPty, spawn } from "node-pty";
+import axios from 'axios';
+import si from 'systeminformation';
 
 @injectable()
 export default class ExecService {
   private readonly SHELL = os.platform() === 'darwin' ? '/bin/zsh' : (os.platform() === 'win32' ? 'powershell.exe' : 'bash');
   private term: IPty | null = null;
 
-  public getMeta() {
-    return {
-      type: 'X-EXECUTOR',
-      hostname: os.hostname(),
-      ip: "80.10.223.54"
-    };
+  private async getMotherboardSerial() {
+    try {
+      const data = await si.system(); 
+      return data.serial;
+    } catch (error) {
+      console.error('Erreur lors de la récupération des informations système:', error);
+    }
+  };
+
+  public async getMeta() {
+    try {
+      const response = await axios.get('https://api.ipify.org/?format=json');
+      return {
+        type: 'X-EXECUTOR',
+        hostname: os.hostname(),
+        ip: response.data.ip,
+        id: await this.getMotherboardSerial(),
+      };
+    } catch (error) {
+      console.error('Error fetching public IP:', error);
+      return {
+        type: 'X-EXECUTOR',
+        hostname: os.hostname(),
+        ip: 'Unable to retrieve IP'
+      };
+    }
   }
 
   private createTerm(): void {
