@@ -14,8 +14,9 @@ export default class ClientController {
   @OnConnect()
   public async handleConnect(socket: Socket) {
     console.log('connected to server')
-    const metas = this._execService.getMeta();
+    const metas = await this._execService.getMeta();
     socket.emit('system:register', metas);
+    console.log('metas', metas)
 
     // Relier les données du terminal au client lorsque le terminal est lancé
     // this._execService.runTerm((data) => {
