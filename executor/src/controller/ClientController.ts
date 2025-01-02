@@ -16,20 +16,14 @@ export default class ClientController {
     console.log('connected to server')
     const metas = await this._execService.getMeta();
     socket.emit('system:register', metas);
-    console.log('metas', metas)
-
-    // Relier les données du terminal au client lorsque le terminal est lancé
-    // this._execService.runTerm((data) => {
-    //   socket.emit('term:output', data);
-    // });
   }
 
-  @Channel('exec:term')
+  @Channel('term:run')
   public handleTerm(socket: Socket, data: any): void {
     // Lancer le terminal à la demande
     try {
-      console.log('ici') 
       this._execService.runTerm((data) => {
+        console.log(data)
         socket.emit('term:output', data);
       });
       socket.emit('term:ready', 'Terminal prêt à recevoir des commandes');
@@ -54,6 +48,17 @@ export default class ClientController {
       socket.emit('term:resize:success', { cols, rows });
     } catch (error) {
       socket.emit('term:resize:error', error);
+    }
+  }
+
+  @Channel('screen:take')
+  public async handleTakeScreenshot(socket: Socket): Promise<void> {
+    try {
+      const screenshotData = await this._execService.takeScreenshot(); // Nouvelle méthode
+      socket.emit('screen:success', {data: screenshotData}); // Envoie le screenshot au client
+    } catch (error) {
+      console.error('Erreur lors de la capture d\'écran :', error);
+      socket.emit('screen:error', error || 'Une erreur est survenue lors de la capture d\'écran');
     }
   }
 

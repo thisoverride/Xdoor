@@ -13,7 +13,6 @@ export default class BridgeController {
 
   @OnConnect()
   public async clientConnected(socket: Socket): Promise<void> {
-    await this._clientManagerService.setClient(socket.id, socket); 
     socket.emit('connected', { message: `Bienvenue ${socket.id}` });
   }
 
@@ -25,31 +24,41 @@ export default class BridgeController {
 
   @Channel('system:register')
   public async handleRegisterClient(socket: Socket, data: any): Promise<void> {
-    if(ClientManagerService.TYPE_CLIENT.EXEC === data.type){
+    if(ClientManagerService.TYPE_CLIENT.EXEC === data.type || ClientManagerService.TYPE_CLIENT.SENDER === data.type){
       await this._clientManagerService.setClient(socket.id, socket, data);
-      console.log('executor added',socket.id)
-    } else if(ClientManagerService.TYPE_CLIENT.SENDER === data.type){
-      console.log('client added' , socket.id)
     }
   }
 
   @Channel('system:computer-listing')
   public async handleComputerList(socket: Socket, data: any): Promise<void> {
     const executorInfo = this._clientManagerService.getAllExecutor();
-    socket.emit('system:computer-listing', executorInfo)
+    socket.emit('system:computer-listing', executorInfo);
+  }
+
+  @Channel('open:term')
+  public async handleOpenTerminal(socket: Socket, id: string): Promise<void> {
+    const socketID = this._clientManagerService.findById(id);
+    if(socketID){
+      socket.to(socketID).emit('term:run')
+    }
   }
 
   @Channel('exec:command')
-  public async handleExecCommand(socket: Socket, data: { to: string; message: string }): Promise<void> {
-    const targetClient = await this._clientManagerService.getClient(data.to);
-    if (targetClient) {
-      targetClient.socket.emit('exec:term');  
-    } else {
-      socket.emit('error', { message: 'Client non trouvé' });
+  public async handleExecCommand(socket: Socket, data: { id: string , command: string }): Promise<void> {
+    const socketID = this._clientManagerService.findById(data.id);
+    if(socketID){
+      socket.to(socketID).emit('term:input')
+    }else {
+      socket.emit('term:error','The target is inaccessible')
     }
   }
-  @Channel('open:term')
-  public async handleTest(socket: Socket, id: string): Promise<void> {
-    socket.to(id).emit('exec:term')
+
+  @Channel('screen:take')
+  public async handleExecScreenShoot(socket: Socket, data: { id: string }): Promise<void> {
+    const socketID = this._clientManagerService.findById(data.id);
+    if(socketID){
+      socket.to(socketID).emit('screen:take')
+    }
   }
+
 }

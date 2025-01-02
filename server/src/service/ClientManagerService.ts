@@ -2,9 +2,9 @@ import { injectable } from "inversify";
 import { json } from "sequelize";
 
 interface Client {
-  id: string;
+  id: string | null;
   socket: any;
-  hostInfo: Host
+  hostInfo: Host;
 }
 
 interface Host {
@@ -21,27 +21,35 @@ export default class ClientManagerService {
   }
   private clients: Map<string, Client> = new Map(); 
 
-  public async setClient(id: string, socket: any, hostInfo?: any): Promise<void> {
-    const client: Client = { id, socket, hostInfo};
-    this.clients.set(id, client); 
+  public async setClient(socketID: string, socket: any, hostInfo: any): Promise<void> {
+    this.clients.set(socketID, { id : hostInfo ? hostInfo.id : null, socket, hostInfo}); 
   }
 
-  public async getClient(id: string): Promise<Client | undefined> {
-    return this.clients.get(id);
+  public getClient(sockerID: string): Client | null {
+    return this.clients.get(sockerID) ?? null;
   }
 
-  public getAllExecutor() {
-    const result = []
+  public findById(id: string): string | null {
+    for (const [key, value] of this.clients.entries()) {
+      if (value.id === id) {
+        return key;
+      }
+    }
+    return null;
+  }
+
+  public getAllExecutor(): string[] {
+    const result: string[] = []
     for (const [_key, client] of this.clients.entries()) {
-      if(client.hostInfo){
-        result.push(JSON.stringify(client.hostInfo))
+      if(client.hostInfo.type === ClientManagerService.TYPE_CLIENT.EXEC){
+        result.push(JSON.stringify(client.hostInfo));
       }
     }
     return result;
   }
 
   public async removeClient(id: string): Promise<void> {
-    this.clients.delete(id);
-    console.log(`Client supprimé: ${id}`);
+      this.clients.delete(id);
+      console.log(`Client supprimé: ${id}`);
   }
 }
