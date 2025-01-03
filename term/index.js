@@ -7,9 +7,14 @@ let currentUser = "";
 socket.emit("system:register", { type: "X-SENDER" ,hostname: null});
 
 socket.on('system:computer-listing', (executorInfo) => {
-    executorInfo.forEach(element => {
-        addOutput(element)
-    });
+    
+    if(executorInfo && executorInfo.length > 0){
+        executorInfo.forEach(element => {
+            addOutput(JSON.stringify(element))
+        });
+    }else{
+        addOutput(`${JSON.stringify(executorInfo)}`)
+    }
 });
 
 
@@ -34,7 +39,7 @@ function addOutput(text) {
 function handleCommand(command) {
     addOutput(`${currentUser} $ ${command}`);
     if(command === 'list'){
-        socket.emit('system:computer-listing', { type: "X-SENDER", command });
+        socket.emit('system:computer-listing', { type: "X-SENDER" });
     }
 
     if(command === 'photo'){
@@ -43,8 +48,10 @@ function handleCommand(command) {
 
     if(command === 'open term'){
         socket.emit('open:term','C02ZPQ76MD6M')
+    }else {
+
+        socket.emit('exec:command', { type: "X-SENDER", command , id: "C02ZPQ76MD6M" });
     }
-    socket.emit('exec:command', { type: "X-SENDER", command , id: "C02ZPQ76MD6M" });
 }
 
 socket.on('response', (result) => {

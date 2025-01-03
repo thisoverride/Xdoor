@@ -13,6 +13,7 @@ export default class BridgeController {
 
   @OnConnect()
   public async clientConnected(socket: Socket): Promise<void> {
+    console.log('connected client', socket.id)
     socket.emit('connected', { message: `Bienvenue ${socket.id}` });
   }
 
@@ -24,8 +25,12 @@ export default class BridgeController {
 
   @Channel('system:register')
   public async handleRegisterClient(socket: Socket, data: any): Promise<void> {
-    if(ClientManagerService.TYPE_CLIENT.EXEC === data.type || ClientManagerService.TYPE_CLIENT.SENDER === data.type){
+    console.log(data)
+    if(ClientManagerService.TYPE_CLIENT.EXEC === data.type || 
+      ClientManagerService.TYPE_CLIENT.SENDER === data.type){
       await this._clientManagerService.setClient(socket.id, socket, data);
+    }else{
+      socket.disconnect(true)
     }
   }
 
@@ -47,7 +52,8 @@ export default class BridgeController {
   public async handleExecCommand(socket: Socket, data: { id: string , command: string }): Promise<void> {
     const socketID = this._clientManagerService.findById(data.id);
     if(socketID){
-      socket.to(socketID).emit('term:input')
+      console.log('command send')
+      socket.to(socketID).emit('term:input',data)
     }else {
       socket.emit('term:error','The target is inaccessible')
     }
@@ -58,6 +64,8 @@ export default class BridgeController {
     const socketID = this._clientManagerService.findById(data.id);
     if(socketID){
       socket.to(socketID).emit('screen:take')
+    }else {
+      socket.emit('term:error','The target is inaccessible')
     }
   }
 

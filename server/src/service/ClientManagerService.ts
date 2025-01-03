@@ -39,12 +39,13 @@ export default class ClientManagerService {
   }
 
   public getAllExecutor(): string[] {
-    const result: string[] = []
+    const result: any = []
     for (const [_key, client] of this.clients.entries()) {
       if(client.hostInfo.type === ClientManagerService.TYPE_CLIENT.EXEC){
-        result.push(JSON.stringify(client.hostInfo));
+        result.push(client.hostInfo);
       }
     }
+    
     return result;
   }
 

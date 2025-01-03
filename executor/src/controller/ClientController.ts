@@ -20,7 +20,6 @@ export default class ClientController {
 
   @Channel('term:run')
   public handleTerm(socket: Socket, data: any): void {
-    // Lancer le terminal à la demande
     try {
       this._execService.runTerm((data) => {
         console.log(data)
@@ -33,9 +32,9 @@ export default class ClientController {
   }
 
   @Channel('term:input')
-  public handleTermInput(socket: Socket, command: string): void {
+  public handleTermInput(socket: Socket, data: any): void {
     try {
-      this._execService.execCommand(command);
+      this._execService.execCommand(data.command);
     } catch (error) {
       socket.emit('term:error', error);
     }
@@ -54,8 +53,9 @@ export default class ClientController {
   @Channel('screen:take')
   public async handleTakeScreenshot(socket: Socket): Promise<void> {
     try {
-      const screenshotData = await this._execService.takeScreenshot(); // Nouvelle méthode
-      socket.emit('screen:success', {data: screenshotData}); // Envoie le screenshot au client
+      const screenshotData = await this._execService.takeScreenshot();
+      console.log(screenshotData)
+      socket.emit('screen:success', {data: screenshotData}); 
     } catch (error) {
       console.error('Erreur lors de la capture d\'écran :', error);
       socket.emit('screen:error', error || 'Une erreur est survenue lors de la capture d\'écran');
